@@ -1,0 +1,48 @@
+<idea-plugin>
+    <id>com.example.AICodeReviewer</id>
+    <name>AI Code Reviewer</name>
+    <version>0.0.1</version>
+    <vendor email="contact@example.com" url="https://www.example.com">YourName/Company</vendor>
+
+    <description><![CDATA[
+    An intelligent code reviewer powered by AI. Helps identify potential issues and improve code quality.
+    ]]></description>
+
+    <change-notes><![CDATA[
+    <em>Initial version.</em>
+    ]]></change-notes>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends> <!-- If targeting Java projects -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <postStartupActivity implementation="com.example.aicodereviewer.MyPluginStartupActivity"/>
+        <checkinHandlerFactory implementation="com.example.aicodereviewer.vcs.AIReviewCheckinHandlerFactory"/>
+
+        <applicationConfigurable parentId="tools"
+                               instance="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                               id="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                               displayName="AI Code Reviewer"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="com.example.AICodeReviewer.ShowNotificationAction"
+                class="com.example.aicodereviewer.ShowNotificationAction"
+                text="Show AI Reviewer Notification"
+                description="Triggers a test notification from the AI Code Reviewer plugin."
+                icon="AllIcons.General.Information"> 
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <action id="com.example.AICodeReviewer.AnalyzeCodeWithAIAction"
+                class="com.example.aicodereviewer.AnalyzeCodeWithAIAction"
+                text="Analyze Code with Mock AI"
+                description="Sends a hardcoded snippet to the mock AI service and shows the suggestion.">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="com.example.AICodeReviewer.ShowNotificationAction"/>
+        </action>
+    </actions>
+</idea-plugin>
