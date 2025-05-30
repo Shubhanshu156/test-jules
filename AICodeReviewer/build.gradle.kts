@@ -1,55 +1,65 @@
 plugins {
-    id("java") // Java plugin
-    id("org.jetbrains.intellij.platform") version "2.0.0-beta2" // IntelliJ Platform plugin
+    id("java")
+    id("org.jetbrains.intellij.platform") version "2.6.0"
 }
 
-intellijPlatform {
-    pluginConfiguration {
-        name = "AI Code Reviewer"
-        id = "com.example.AICodeReviewer" // Replace with a unique ID later
-        version = "0.0.1"
-        vendor {
-            name = "YourName/Company" // Placeholder
-            email = "contact@example.com" // Placeholder
-        }
-        description = "An intelligent code reviewer powered by AI."
-        changeNotes = "Initial version."
-    }
-
-    // Configure the target IntelliJ Platform version
-    pluginVerification {
-        // Define IDE versions for plugin verification
-        ides {
-            recommended() // Uses the same IDE version as Gradle
-        }
-    }
-}
+group = "com.example"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
-}
-
-dependencies {
     intellijPlatform {
-        // Define the target IntelliJ Platform dependency (e.g., IntelliJ IDEA Community Edition)
-        // bundledPlugin("com.intellij.java") // Example: Add dependency on Java plugin if needed
-        // No, the plugin.xml already has <depends>com.intellij.modules.java</depends>
-        // and the template from JetBrains for a new plugin does not add this by default here.
-        // It's usually for depending on *other* plugins, not core modules like Java support.
+        defaultRepositories()
     }
 }
 
-// Configure Java compilation options
+dependencies {
+    // IntelliJ Platform dependencies
+    intellijPlatform {
+        intellijIdeaCommunity("2023.1")
+        bundledPlugin("com.intellij.java")
+
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
+    }
+
+    // Other dependencies
+    implementation("org.jetbrains:annotations:24.0.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+}
+
+// Configure IntelliJ Platform Plugin
+intellijPlatform {
+    pluginConfiguration {
+        name = "AI Code Reviewer"
+        version = project.version.toString()
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
+    }
+}
+
+// Java compatibility settings
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
-    // Set the JVM arguments for the `runIde` task.
+    compileJava {
+        options.encoding = "UTF-8"
+    }
+
     runIde {
-        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-        jvmArgs("--add-opens", "java.base/java.io=ALL-UNNAMED")
-        // Add other necessary --add-opens options if required during development
+        jvmArgs(
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+            "--add-opens", "java.base/java.io=ALL-UNNAMED",
+            "--add-opens", "java.base/java.util=ALL-UNNAMED",
+            "--add-opens", "java.desktop/sun.awt=ALL-UNNAMED"
+        )
     }
 }

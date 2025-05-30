@@ -41,7 +41,7 @@ public class MockAIService {
     private static final int MAX_PARAMETERS = 5;
 
 
-    private MockAIService() {}
+    public MockAIService() {}
 
     public static MockAIService getInstance() {
         return INSTANCE;

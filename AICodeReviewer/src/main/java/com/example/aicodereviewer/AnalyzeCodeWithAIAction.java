@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class AnalyzeCodeWithAIAction extends AnAction {
 
-    private final MockAIService aiService = new MockAIService();
+    private final MockAIService aiService = MockAIService.getInstance();
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -62,7 +62,8 @@ public class AnalyzeCodeWithAIAction extends AnAction {
         AIReviewPreferences preferences = new AIReviewPreferences(
             Collections.singletonList("general-best-practices"), 
             10, 
-            Collections.singletonList("build/")
+            Collections.singletonList("build/"),
+            null // enabledChecks
         );
 
         AIReviewRequest request = new AIReviewRequest(requestId, timestamp, target, preferences);

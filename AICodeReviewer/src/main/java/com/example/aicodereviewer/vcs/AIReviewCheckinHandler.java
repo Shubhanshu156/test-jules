@@ -16,6 +16,7 @@ import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
+import com.intellij.openapi.vcs.ui.RefreshableOnComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -24,7 +25,6 @@ import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -50,9 +50,8 @@ public class AIReviewCheckinHandler extends CheckinHandler {
         this.panel = panel;
     }
 
-    @Nullable
     @Override
-    public JComponent getBeforeCheckinConfigurationPanel() {
+    public @Nullable RefreshableOnComponent getBeforeCheckinConfigurationPanel() {
         return null;
     }
 
@@ -60,22 +59,22 @@ public class AIReviewCheckinHandler extends CheckinHandler {
     public ReturnResult beforeCheckin() {
         AIReviewerSettingsState settings = AIReviewerSettingsState.getInstance();
         if (!settings.preCommitHookEnabled) {
-            return ReturnResult.COMMIT_CONTINUED; 
+            return ReturnResult.COMMIT;
         }
 
         Collection<Change> selectedChanges = panel.getSelectedChanges();
         if (selectedChanges.isEmpty()) {
-            return ReturnResult.COMMIT_CONTINUED;
+            return ReturnResult.COMMIT;
         }
 
         final AtomicReference<AIReviewResponse> finalReviewResponse = new AtomicReference<>();
         final List<AIReviewIssue> allIssues = Collections.synchronizedList(new ArrayList<>());
-        final AtomicReference<ReturnResult> result = new AtomicReference<>(ReturnResult.COMMIT_CONTINUED);
+        final AtomicReference<ReturnResult> result = new AtomicReference<>(ReturnResult.COMMIT);
         final String notificationGroup = "AI Code Reviewer Commit Notification";
         
         final AIReviewSummary aggregatedSummary = new AIReviewSummary();
-        final List<AIReviewFile> processedFilesForSummary = new ArrayList<>(); 
-        long totalProcessingTime = 0;
+        final List<AIReviewFile> processedFilesForSummary = new ArrayList<>();
+        final long[] totalProcessingTime = {0};
 
 
         ProgressManager.getInstance().run(new Task.Modal(project, "Running AI Code Review...", true) {
@@ -99,7 +98,7 @@ public class AIReviewCheckinHandler extends CheckinHandler {
                 if (totalFilesToAnalyze == 0) { 
                     aggregatedSummary.setTotalFilesAnalyzed(0);
                     finalReviewResponse.set(new AIReviewResponse(UUID.randomUUID().toString(), DateTimeFormatter.ISO_INSTANT.format(Instant.now()), aggregatedSummary, allIssues));
-                    result.set(ReturnResult.COMMIT_CONTINUED);
+                    result.set(ReturnResult.COMMIT);
                     return;
                 }
 
@@ -114,7 +113,7 @@ public class AIReviewCheckinHandler extends CheckinHandler {
 
                 for (Change change : changesToAnalyze) { 
                     if (indicator.isCanceled()) {
-                        result.set(ReturnResult.COMMIT_ABORTED);
+                        result.set(ReturnResult.CANCEL);
                         return;
                     }
                     
@@ -157,7 +156,7 @@ public class AIReviewCheckinHandler extends CheckinHandler {
                                 aggregatedSummary.setSuggestionIssues(aggregatedSummary.getSuggestionIssues() + response.getSummary().getSuggestionIssues());
                                 aggregatedSummary.setInfoIssues(aggregatedSummary.getInfoIssues() + response.getSummary().getInfoIssues());
                             }
-                             totalProcessingTime += response.getSummary() != null ? response.getSummary().getAnalysisDurationMs() : 0;
+                             totalProcessingTime[0] += response.getSummary() != null ? response.getSummary().getAnalysisDurationMs() : 0;
                         }
                     } catch (Exception e) {
                         LOG.error("Error calling MockAIService for file " + virtualFile.getPath(), e);
@@ -165,18 +164,18 @@ public class AIReviewCheckinHandler extends CheckinHandler {
                 }
 
                 if (indicator.isCanceled()) {
-                    result.set(ReturnResult.COMMIT_ABORTED);
+                    result.set(ReturnResult.CANCEL);
                     return;
                 }
                 
                 aggregatedSummary.setTotalFilesAnalyzed(processedFilesForSummary.size());
-                aggregatedSummary.setAnalysisDurationMs(totalProcessingTime);
+                aggregatedSummary.setAnalysisDurationMs(totalProcessingTime[0]);
                 finalReviewResponse.set(new AIReviewResponse(UUID.randomUUID().toString(), DateTimeFormatter.ISO_INSTANT.format(Instant.now()), aggregatedSummary, allIssues));
 
                 if (aggregatedSummary.getCriticalIssues() > 0) {
-                    result.set(ReturnResult.COMMIT_ABORTED);
+                    result.set(ReturnResult.CANCEL);
                 } else {
-                    result.set(ReturnResult.COMMIT_CONTINUED);
+                    result.set(ReturnResult.CANCEL);
                 }
             }
         });
@@ -189,7 +188,7 @@ public class AIReviewCheckinHandler extends CheckinHandler {
         }
 
         // Show dialog or notification
-        if (result.get() == ReturnResult.COMMIT_ABORTED || (responseToShow != null && responseToShow.getSummary().getTotalIssues() > 0)) {
+        if (result.get() == ReturnResult.CANCEL || (responseToShow != null && responseToShow.getSummary().getTotalIssues() > 0)) {
              UIUtil.invokeLaterIfNeeded(() -> {
                 AIReviewResultsDialog dialog = new AIReviewResultsDialog(project, responseToShow != null ? responseToShow : 
                     new AIReviewResponse(UUID.randomUUID().toString(), DateTimeFormatter.ISO_INSTANT.format(Instant.now()), new AIReviewSummary(), Collections.emptyList())

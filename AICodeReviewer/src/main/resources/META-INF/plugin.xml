@@ -1,31 +1,39 @@
 <idea-plugin>
-    <id>com.example.AICodeReviewer</id>
+    <id>com.example.aicodereviewer</id>
     <name>AI Code Reviewer</name>
-    <version>0.0.1</version>
-    <vendor email="contact@example.com" url="https://www.example.com">YourName/Company</vendor>
+    <version>1.0.0</version>
+    <vendor email="your.email@example.com" url="https://your-website.com">Your Name</vendor>
 
     <description><![CDATA[
-    An intelligent code reviewer powered by AI. Helps identify potential issues and improve code quality.
+        AI-powered code review plugin for IntelliJ IDEA.
     ]]></description>
 
-    <change-notes><![CDATA[
-    <em>Initial version.</em>
-    ]]></change-notes>
+    <!-- Minimum supported version of IntelliJ IDEA -->
+    <idea-version since-build="231.0"/>
 
-    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
-         on how to target different products -->
+    <!-- Dependencies on other plugins -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends> <!-- If targeting Java projects -->
-
+    <depends>com.intellij.modules.java</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <!-- VCS Checkin Handler -->
         <postStartupActivity implementation="com.example.aicodereviewer.MyPluginStartupActivity"/>
         <checkinHandlerFactory implementation="com.example.aicodereviewer.vcs.AIReviewCheckinHandlerFactory"/>
+        <applicationService serviceImplementation="com.example.aicodereviewer.settings.AIReviewerSettingsState"/>
+
 
         <applicationConfigurable parentId="tools"
-                               instance="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
-                               id="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
-                               displayName="AI Code Reviewer"/>
+                                 instance="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                                 id="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                                 displayName="AI Code Reviewer"/>
+        <checkinHandlerFactory implementation="com.example.aicodereviewer.vcs.AIReviewCheckinHandlerFactory"/>
+
+        <!-- Notification Groups -->
+        <notificationGroup id="AI Code Reviewer Notification Group"
+                           displayName="AI Code Reviewer"
+                           displayType="BALLOON"/>
+        <notificationGroup id="AI_CODE_REVIEWER_NOTIFICATIONS"
+                           displayName="AI Code Reviewer"
+                           displayType="BALLOON"/>
     </extensions>
 
     <actions>
@@ -34,7 +42,7 @@
                 class="com.example.aicodereviewer.ShowNotificationAction"
                 text="Show AI Reviewer Notification"
                 description="Triggers a test notification from the AI Code Reviewer plugin."
-                icon="AllIcons.General.Information"> 
+                icon="AllIcons.General.Information">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
 

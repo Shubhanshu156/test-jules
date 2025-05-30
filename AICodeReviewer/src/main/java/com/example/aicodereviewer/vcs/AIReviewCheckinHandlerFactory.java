@@ -1,10 +1,10 @@
 package com.example.aicodereviewer.vcs;
 
+import com.intellij.openapi.vcs.CheckinProjectPanel;
+import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
-import com.intellij.openapi.vcs.checkin.CheckinProjectPanel;
 import com.intellij.openapi.vcs.ui.CommitMessage; // For CommitContext, though not directly used in this simple factory
-import com.intellij.openapi.vcs.checkin.CommitContext;
 import org.jetbrains.annotations.NotNull;
 
 public class AIReviewCheckinHandlerFactory extends CheckinHandlerFactory {

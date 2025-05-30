@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
+import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 
@@ -21,7 +22,7 @@ public class ReportGenerator {
 
     private static final Logger LOG = Logger.getInstance(ReportGenerator.class);
     private static final String REPORT_DIR_NAME = ".review";
-    private static final String NOTIFICATION_GROUP = "AI Code Reviewer Report Notification";
+    private static final String NOTIFICATION_GROUP_ID = "AI_CODE_REVIEWER_NOTIFICATIONS";
 
     public static void saveReportAsJson(Project project, AIReviewResponse reviewResponse) {
         if (project == null || reviewResponse == null) {
@@ -57,22 +58,35 @@ public class ReportGenerator {
                 writer.write(jsonReport);
                 LOG.info("AI review report saved to: " + reportFile.getAbsolutePath());
 
-                // Notify user
-                NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_GROUP)
-                        .createNotification("AI Review Report Generated", "Report saved to: " + reportFile.getAbsolutePath(), NotificationType.INFORMATION)
-                        .notify(project);
+                // Notify user - with null safety
+                showNotification(project, "AI Review Report Generated",
+                        "Report saved to: " + reportFile.getAbsolutePath(), NotificationType.INFORMATION);
             }
 
         } catch (IOException e) {
             LOG.error("Error saving AI review report: " + e.getMessage(), e);
-            NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_GROUP)
-                        .createNotification("AI Review Report Failed", "Could not save report: " + e.getMessage(), NotificationType.ERROR)
-                        .notify(project);
-        } catch (Exception e) { // Catch other potential errors like SecurityException from createDirectories
+            showNotification(project, "AI Review Report Failed",
+                    "Could not save report: " + e.getMessage(), NotificationType.ERROR);
+        } catch (Exception e) {
             LOG.error("An unexpected error occurred while saving AI review report: " + e.getMessage(), e);
-             NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_GROUP)
-                        .createNotification("AI Review Report Failed", "Unexpected error saving report: " + e.getMessage(), NotificationType.ERROR)
-                        .notify(project);
+            showNotification(project, "AI Review Report Failed",
+                    "Unexpected error saving report: " + e.getMessage(), NotificationType.ERROR);
+        }
+    }
+
+    private static void showNotification(Project project, String title, String content, NotificationType type) {
+        try {
+            NotificationGroup notificationGroup = NotificationGroupManager.getInstance()
+                    .getNotificationGroup(NOTIFICATION_GROUP_ID);
+
+            if (notificationGroup != null) {
+                notificationGroup.createNotification(title, content, type).notify(project);
+            } else {
+                // Fallback: Log the message if notification group is not available
+                LOG.info("Notification: " + title + " - " + content);
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to show notification: " + e.getMessage() + ". Message was: " + title + " - " + content);
         }
     }
 }
