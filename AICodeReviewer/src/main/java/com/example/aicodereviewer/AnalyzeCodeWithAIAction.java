@@ -1,5 +1,8 @@
 package com.example.aicodereviewer;
 
+import com.example.aicodereviewer.ai.AICodeReviewService;
+import com.example.aicodereviewer.ai.AIProviderConfig;
+import com.example.aicodereviewer.ai.AIProviderException;
 import com.example.aicodereviewer.ai.MockAIService;
 import com.example.aicodereviewer.ai.model.*;
 import com.intellij.notification.NotificationGroupManager;
@@ -17,7 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
+
+import com.example.aicodereviewer.ai.DefaultAIProviderConfig;
 
 public class AnalyzeCodeWithAIAction extends AnAction {
 
@@ -69,7 +75,19 @@ public class AnalyzeCodeWithAIAction extends AnAction {
         AIReviewRequest request = new AIReviewRequest(requestId, timestamp, target, preferences);
 
         // Call the service
-        AIReviewResponse response = aiService.analyzeCode(request);
+        AICodeReviewService service = new AICodeReviewService();
+        AIProviderConfig config = new DefaultAIProviderConfig.Builder()
+            .apiKey("your-gemini-api-key")
+            .timeoutSeconds(30)
+            .maxRetries(3)
+            .build();
+
+        AIReviewResponse response = null;
+        try {
+            response = service.analyzeCode(request, "gemini", config);
+        } catch (AIProviderException ex) {
+            throw new RuntimeException(ex);
+        }
 
         // Display summary from response
         AIReviewSummary summary = response.getSummary();

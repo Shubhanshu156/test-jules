@@ -6,27 +6,27 @@ package com.example.aicodereviewer.ai;
 // import com.example.aicodereviewer.ai.model.AIReviewRequest;
 // import com.example.aicodereviewer.ai.model.AIReviewResponse;
 
-public interface AICodeReviewService {
+public interface AiCodeReviewService {
+    /**
+     * Analyzes code and returns review issues
+     * @param request The code review request
+     * @return AI review response
+     * @throws AIProviderException if analysis fails
+     */
+    AIReviewResponse analyzeCode(AIReviewRequest request) throws AIProviderException;
 
     /**
-     * Analyzes the given code using an AI model.
-     *
-     * @param request The request containing the code to be analyzed and other parameters.
-     * @return The response from the AI model, including suggestions and analysis.
+     * Gets the provider name (e.g., "gemini", "chatgpt", "deepseek")
      */
-    com.example.aicodereviewer.ai.model.AIReviewResponse analyzeCode(com.example.aicodereviewer.ai.model.AIReviewRequest request);
+    String getProviderName();
 
     /**
-     * Checks the health of the AI code review service.
-     *
-     * @return true if the service is healthy and operational, false otherwise.
+     * Checks if the provider is available/configured
      */
-    boolean isHealthy();
+    boolean isAvailable();
 
     /**
-     * Retrieves information about the AI model being used by the service.
-     *
-     * @return An object containing details about the AI model.
+     * Gets provider-specific configuration requirements
      */
-    com.example.aicodereviewer.ai.model.AIModelInfo getModelInfo();
+    Set<String> getRequiredConfigKeys();
 }

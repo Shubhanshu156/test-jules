@@ -1,0 +1,56 @@
+<idea-plugin>
+    <id>com.example.aicodereviewer</id>
+    <name>AI Code Reviewer</name>
+    <version>1.0.0</version>
+    <vendor email="your.email@example.com" url="https://your-website.com">Your Name</vendor>
+
+    <description><![CDATA[
+        AI-powered code review plugin for IntelliJ IDEA.
+    ]]></description>
+
+    <!-- Minimum supported version of IntelliJ IDEA -->
+    <idea-version since-build="231.0"/>
+
+    <!-- Dependencies on other plugins -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- VCS Checkin Handler -->
+        <postStartupActivity implementation="com.example.aicodereviewer.MyPluginStartupActivity"/>
+        <checkinHandlerFactory implementation="com.example.aicodereviewer.vcs.AIReviewCheckinHandlerFactory"/>
+        <applicationService serviceImplementation="com.example.aicodereviewer.settings.AIReviewerSettingsState"/>
+
+
+        <applicationConfigurable parentId="tools"
+                                 instance="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                                 id="com.example.aicodereviewer.settings.AIReviewerSettingsConfigurable"
+                                 displayName="AI Code Reviewer"/>
+        <checkinHandlerFactory implementation="com.example.aicodereviewer.vcs.AIReviewCheckinHandlerFactory"/>
+
+        <!-- Notification Groups -->
+        <notificationGroup id="AI Code Reviewer Notification Group"
+                           displayName="AI Code Reviewer"
+                           displayType="BALLOON"/>
+        <notificationGroup id="AI_CODE_REVIEWER_NOTIFICATIONS"
+                           displayName="AI Code Reviewer"
+                           displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="com.example.AICodeReviewer.ShowNotificationAction"
+                class="com.example.aicodereviewer.ShowNotificationAction"
+                text="Show AI Reviewer Notification"
+                description="Triggers a test notification from the AI Code Reviewer plugin."
+                icon="AllIcons.General.Information">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <action id="com.example.AICodeReviewer.AnalyzeCodeWithAIAction"
+                class="com.example.aicodereviewer.AnalyzeCodeWithAIAction"
+                text="Analyze Code with Mock AI"
+                description="Sends a hardcoded snippet to the mock AI service and shows the suggestion.">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="com.example.AICodeReviewer.ShowNotificationAction"/>
+        </action>
+    </actions>
+</idea-plugin>

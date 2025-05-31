@@ -1,6 +1,5 @@
 package com.example.aicodereviewer;
 
-import com.example.aicodereviewer.ai.AICodeReviewService;
 import com.example.aicodereviewer.ai.AIServiceProvider;
 import com.example.aicodereviewer.ai.model.AIReviewIssue;
 import com.example.aicodereviewer.ai.model.AIReviewRequest;
