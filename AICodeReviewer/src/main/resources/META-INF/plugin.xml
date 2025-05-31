@@ -34,10 +34,61 @@
         <notificationGroup id="AI_CODE_REVIEWER_NOTIFICATIONS"
                            displayName="AI Code Reviewer"
                            displayType="BALLOON"/>
+
+        <!-- Tool Window Registration -->
+        <toolWindow id="AI Code Review"
+                    anchor="bottom"
+                    factoryClass="com.example.aicodereviewer.ui.AIReviewToolWindowFactory"
+                    icon="AllIcons.Toolwindows.ToolWindowMessages"
+                    canCloseContents="true"/>
+
+        <!-- Project Service Registration -->
+        <projectService serviceImplementation="com.example.aicodereviewer.services.RealTimeAnalysisService"/>
+        <projectService serviceImplementation="com.example.aicodereviewer.services.EnsembleAnalysisService"/>
+
+        <!-- Application Service Registration -->
+        <applicationService serviceImplementation="com.example.aicodereviewer.services.FeedbackCollectorService"/>
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <!-- Toolbar Actions -->
+        <group id="AICodeReview.ToolbarGroup" text="AI Code Review" popup="false">
+            <action id="AICodeReview.ReviewCurrentFile"
+                    class="com.example.aicodereviewer.actions.ReviewCurrentFileAction"
+                    text="Review Current File"
+                    description="Perform AI code review on the current file."
+                    icon="AllIcons.Actions.Execute"/>
+            <action id="AICodeReview.ReviewSelection"
+                    class="com.example.aicodereviewer.actions.ReviewSelectionAction"
+                    text="Review Selection"
+                    description="Perform AI code review on the selected code."
+                    icon="AllIcons.Actions.Find"/>
+            <action id="AICodeReview.FullProjectReview"
+                    class="com.example.aicodereviewer.actions.FullProjectReviewAction"
+                    text="Full Project Review"
+                    description="Perform AI code review on the entire project."
+                    icon="AllIcons.Actions.ProjectDirectory"/>
+            <add-to-group group-id="MainToolBar" anchor="last"/>
+        </group>
+
+        <!-- Context Menu Actions -->
+        <group id="AICodeReview.ContextMenuGroup" text="AI Code Review" popup="true">
+            <action id="AICodeReview.ExplainThisCode"
+                    class="com.example.aicodereviewer.actions.ExplainThisCodeAction"
+                    text="Explain This Code"
+                    description="Get an AI explanation for the selected code."/>
+            <action id="AICodeReview.SuggestImprovements"
+                    class="com.example.aicodereviewer.actions.SuggestImprovementsAction"
+                    text="Suggest Improvements"
+                    description="Get AI suggestions for improving the selected code."/>
+            <!-- Separator can be added if needed -->
+            <!-- <separator/> -->
+            <!-- Example of referencing one of the toolbar actions in context menu as well -->
+            <!-- <reference ref="AICodeReview.ReviewSelection"/> -->
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </group>
+
+        <!-- Existing example actions (can be kept or removed as needed) -->
         <action id="com.example.AICodeReviewer.ShowNotificationAction"
                 class="com.example.aicodereviewer.ShowNotificationAction"
                 text="Show AI Reviewer Notification"

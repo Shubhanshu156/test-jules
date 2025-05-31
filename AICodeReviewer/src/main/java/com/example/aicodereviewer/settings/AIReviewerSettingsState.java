@@ -14,8 +14,27 @@ import org.jetbrains.annotations.Nullable;
 )
 public class AIReviewerSettingsState implements PersistentStateComponent<AIReviewerSettingsState> {
 
-    public boolean preCommitHookEnabled = true;
-    public String apiKey = "";
+    public String selectedModel = "Auto-Select";
+    public String geminiApiKey = "";
+    public String openAiApiKey = "";
+    public String claudeApiKey = "";
+    public boolean storeKeysSecurely = true;
+    public boolean validateKeysOnStartup = true;
+    public String analysisDepth = "Standard";
+    public Map<String, Boolean> issueCategories = new HashMap<>();
+
+    public boolean preCommitHookEnabled = true; // Retaining existing fields
+    public String apiKey = ""; // Retaining existing fields, though it might be deprecated by specific keys
+
+    public AIReviewerSettingsState() {
+        // Initialize default issue categories
+        issueCategories.put("Security Vulnerabilities", true);
+        issueCategories.put("Performance Issues", true);
+        issueCategories.put("Code Smells", true);
+        issueCategories.put("Documentation Issues", false);
+        issueCategories.put("Design Pattern Violations", false);
+        issueCategories.put("Memory & Resource Leaks", true);
+    }
 
     public static AIReviewerSettingsState getInstance() {
         return ApplicationManager.getApplication().getService(AIReviewerSettingsState.class);
